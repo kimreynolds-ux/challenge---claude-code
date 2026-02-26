@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from "recharts";
 
 // ─── DATA GENERATION ───────────────────────────────────────────────────────────
 function generateData() {
@@ -58,9 +58,28 @@ const pct = (a, b) => b === 0 ? "0%" : (a / b * 100).toFixed(1) + "%";
 const METHOD_LABELS = { credit_card:"Credit Card", debit_card:"Debit Card", pix:"PIX", oxxo:"OXXO", pse:"PSE", bank_transfer:"Bank Transfer" };
 const REASON_LABELS = { insufficient_funds:"Insufficient Funds", issuer_timeout:"Issuer Timeout", do_not_honor:"Do Not Honor", processing_error:"Processing Error", expired_card:"Expired Card", invalid_cvv:"Invalid CVV", stolen_card:"Stolen Card", fraud_suspected:"Fraud Suspected", card_blocked:"Card Blocked" };
 
+// ─── YUNO DESIGN TOKENS ─────────────────────────────────────────────────────────
+const Y = {
+  primary:   "#4958e2",
+  primary2:  "#5463e3",
+  primary3:  "#808be8",
+  primaryBg: "#ecedf7",
+  lavender:  "#afb6ee",
+  dark:      "#292b31",
+  gray:      "#a4a5ac",
+  pageBg:    "#f4f5fb",
+  cardBg:    "#ffffff",
+  border:    "#e2e4f0",
+  success:   "#16a34a",
+  successBg: "#dcfce7",
+  warn:      "#d97706",
+  warnBg:    "#fef3c7",
+  error:     "#dc2626",
+  errorBg:   "#fee2e2",
+};
+
 function getDateRange(days) {
-  const now = Date.now();
-  return now - days * 86400000;
+  return Date.now() - days * 86400000;
 }
 
 // ─── MAIN APP ───────────────────────────────────────────────────────────────────
@@ -91,13 +110,10 @@ export default function App() {
     const passedAuth = passedValidation - failedAuth;
     const failedCapture = data.filter(t => t.stage === "capture" && t.status === "failed").length;
     const captured = passedAuth - failedCapture;
-
-    const authAttempts = passedValidation;
-    const authRate = authAttempts > 0 ? (passedAuth / authAttempts * 100).toFixed(1) : 0;
+    const authRate = passedValidation > 0 ? (passedAuth / passedValidation * 100).toFixed(1) : 0;
     const authFailed = data.filter(t => t.stage === "authorization" && t.status === "failed");
     const softDeclines = authFailed.filter(t => t.declineType === "soft").length;
     const hardDeclines = authFailed.filter(t => t.declineType === "hard").length;
-
     const reasonsByStage = {};
     ["validation","authorization","capture"].forEach(s => {
       const fails = data.filter(t => t.stage === s && t.status === "failed");
@@ -105,7 +121,6 @@ export default function App() {
       fails.forEach(t => { counts[t.reason] = (counts[t.reason] || 0) + 1; });
       reasonsByStage[s] = Object.entries(counts).map(([r,c]) => ({ reason: REASON_LABELS[r] || r, count: c, pct: fails.length > 0 ? (c/fails.length*100).toFixed(1) : 0 })).sort((a,b)=>b.count-a.count);
     });
-
     return { total, passedValidation, failedValidation, passedAuth, failedAuth, captured, failedCapture, authRate, softDeclines, hardDeclines, authFailed: authFailed.length, reasonsByStage };
   }
 
@@ -139,10 +154,10 @@ export default function App() {
     const worst = methodBreakdown[methodBreakdown.length - 1];
     if (!best || !worst) return null;
     const softPct = funnel.authFailed > 0 ? (funnel.softDeclines / funnel.authFailed * 100).toFixed(0) : 0;
-    if (parseFloat(funnel.authRate) < 75) return { type: "warn", msg: `⚠️ Authorization rate is critically low at ${funnel.authRate}% — immediate action needed.` };
-    if (softPct > 60) return { type: "info", msg: `💡 ${softPct}% of declines are soft — retry logic could recover significant revenue.` };
-    if (best.authRate - worst.authRate > 15) return { type: "warn", msg: `⚠️ ${worst.method} has a ${worst.authRate}% auth rate vs ${best.method}'s ${best.authRate}% — investigate this gap.` };
-    return { type: "good", msg: `✅ ${best.method} is your top performer at ${best.authRate}% authorization rate.` };
+    if (parseFloat(funnel.authRate) < 75) return { type: "error", msg: `Authorization rate is critically low at ${funnel.authRate}% — immediate action needed.` };
+    if (softPct > 60) return { type: "info", msg: `${softPct}% of declines are soft — retry logic could recover significant revenue.` };
+    if (best.authRate - worst.authRate > 15) return { type: "warn", msg: `${worst.method} has a ${worst.authRate}% auth rate vs ${best.method}'s ${best.authRate}% — investigate this gap.` };
+    return { type: "success", msg: `${best.method} is your top performer at ${best.authRate}% authorization rate.` };
   }, [funnel, methodBreakdown]);
 
   const compareData = useMemo(() => {
@@ -155,20 +170,34 @@ export default function App() {
 
   const stageH = (val, max) => Math.max(40, (val / max) * 180);
 
+  const insightColors = {
+    success: { bg: Y.successBg, border: Y.success, color: "#14532d", icon: "✓" },
+    warn:    { bg: Y.warnBg,    border: Y.warn,    color: "#78350f", icon: "!" },
+    error:   { bg: Y.errorBg,  border: Y.error,   color: "#7f1d1d", icon: "!" },
+    info:    { bg: Y.primaryBg, border: Y.primary, color: Y.dark,   icon: "i" },
+  };
+
   return (
-    <div style={{ background:"#1a1c22", minHeight:"100vh", color:"#ecedf7", fontFamily:"'Inter', 'DM Sans', sans-serif", padding:"0" }}>
-      <div style={{ background:"#292b31", borderBottom:"1px solid #3c3e48", padding:"16px 32px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-        <div>
-          <div style={{ fontSize:20, fontWeight:700, color:"#ecedf7" }}>✈️ TravelHub</div>
-          <div style={{ fontSize:12, color:"#afb6ee" }}>Payment Intelligence Dashboard</div>
+    <div style={{ background: Y.pageBg, minHeight:"100vh", color: Y.dark, fontFamily:"'Inter', sans-serif" }}>
+
+      {/* Header */}
+      <div style={{ background: Y.primary, padding:"0 32px", display:"flex", alignItems:"center", justifyContent:"space-between", height:60 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+          <div style={{ background:"white", borderRadius:8, width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center", fontSize:16 }}>✈️</div>
+          <div>
+            <div style={{ fontSize:16, fontWeight:700, color:"white", lineHeight:1.2 }}>TravelHub</div>
+            <div style={{ fontSize:11, color: Y.lavender, lineHeight:1 }}>Payment Intelligence</div>
+          </div>
         </div>
-        <div style={{ fontSize:12, color:"#a4a5ac" }}>
+        <div style={{ fontSize:12, color: Y.lavender }}>
           {fmt(filtered.length)} transactions · Last {filterDays} days
         </div>
       </div>
 
       <div style={{ padding:"24px 32px" }}>
-        <div style={{ display:"flex", gap:12, marginBottom:24, flexWrap:"wrap", alignItems:"center" }}>
+
+        {/* Filters */}
+        <div style={{ background: Y.cardBg, borderRadius:12, border:`1px solid ${Y.border}`, padding:"16px 20px", marginBottom:20, display:"flex", gap:16, flexWrap:"wrap", alignItems:"flex-end" }}>
           <FilterBadge label="Payment Method">
             <select value={filterMethod} onChange={e=>setFilterMethod(e.target.value)} style={selectStyle}>
               <option value="all">All Methods</option>
@@ -188,14 +217,15 @@ export default function App() {
               <option value={30}>Last 30 days</option>
             </select>
           </FilterBadge>
-          <button onClick={()=>{setFilterMethod("all");setFilterCountry("all");setFilterDays(30);}} style={{ background:"#3c3e48", border:"none", color:"#afb6ee", padding:"8px 14px", borderRadius:8, cursor:"pointer", fontSize:12 }}>
+          <button onClick={()=>{setFilterMethod("all");setFilterCountry("all");setFilterDays(30);}} style={{ background:"white", border:`1px solid ${Y.border}`, color: Y.gray, padding:"8px 14px", borderRadius:8, cursor:"pointer", fontSize:12 }}>
             ↺ Reset
           </button>
-          <button onClick={()=>setCompareMode(!compareMode)} style={{ background: compareMode?"#4958e2":"#3c3e48", border:"none", color: compareMode?"white":"#afb6ee", padding:"8px 14px", borderRadius:8, cursor:"pointer", fontSize:12, marginLeft:"auto" }}>
+          <button onClick={()=>setCompareMode(!compareMode)} style={{ background: compareMode ? Y.primary : "white", border:`1px solid ${compareMode ? Y.primary : Y.border}`, color: compareMode ? "white" : Y.dark, padding:"8px 14px", borderRadius:8, cursor:"pointer", fontSize:12, marginLeft:"auto", fontWeight:500 }}>
             ⚖️ Compare Mode
           </button>
         </div>
 
+        {/* Active filter tags */}
         {(filterMethod !== "all" || filterCountry !== "all" || filterDays !== 30) && (
           <div style={{ display:"flex", gap:8, marginBottom:16, flexWrap:"wrap" }}>
             {filterMethod !== "all" && <Tag label={METHOD_LABELS[filterMethod]} onRemove={()=>setFilterMethod("all")} />}
@@ -204,27 +234,33 @@ export default function App() {
           </div>
         )}
 
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16, marginBottom:24 }}>
-          <KPI label="Auth Rate" value={`${funnel.authRate}%`} sub={`${fmt(funnel.passedAuth)} approved`} color={parseFloat(funnel.authRate)>80?"#10b981":parseFloat(funnel.authRate)>70?"#f59e0b":"#ef4444"} />
-          <KPI label="Total Transactions" value={fmt(funnel.total)} sub={`${fmt(funnel.captured)} captured`} color="#4958e2" />
-          <KPI label="Soft Declines" value={pct(funnel.softDeclines, funnel.authFailed)} sub={`${fmt(funnel.softDeclines)} retryable`} color="#f59e0b" />
-          <KPI label="Hard Declines" value={pct(funnel.hardDeclines, funnel.authFailed)} sub={`${fmt(funnel.hardDeclines)} permanent`} color="#ef4444" />
+        {/* KPI Cards */}
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16, marginBottom:20 }}>
+          <KPI label="Authorization Rate" value={`${funnel.authRate}%`} sub={`${fmt(funnel.passedAuth)} approved`}
+            color={parseFloat(funnel.authRate)>80 ? Y.success : parseFloat(funnel.authRate)>70 ? Y.warn : Y.error}
+            bg={parseFloat(funnel.authRate)>80 ? Y.successBg : parseFloat(funnel.authRate)>70 ? Y.warnBg : Y.errorBg} />
+          <KPI label="Total Transactions" value={fmt(funnel.total)} sub={`${fmt(funnel.captured)} captured`} color={Y.primary} bg={Y.primaryBg} />
+          <KPI label="Soft Declines" value={pct(funnel.softDeclines, funnel.authFailed)} sub={`${fmt(funnel.softDeclines)} retryable`} color={Y.warn} bg={Y.warnBg} />
+          <KPI label="Hard Declines" value={pct(funnel.hardDeclines, funnel.authFailed)} sub={`${fmt(funnel.hardDeclines)} permanent`} color={Y.error} bg={Y.errorBg} />
         </div>
 
-        {insight && (
-          <div style={{ background: insight.type==="warn"?"#7c2d12":insight.type==="good"?"#14532d":"#1e3a5f", border:`1px solid ${insight.type==="warn"?"#dc2626":insight.type==="good"?"#16a34a":"#5463e3"}`, borderRadius:10, padding:"12px 18px", marginBottom:24, fontSize:14, color:"#ecedf7" }}>
+        {/* Insight Banner */}
+        {insight && (() => { const c = insightColors[insight.type]; return (
+          <div style={{ background: c.bg, border:`1px solid ${c.border}`, borderRadius:10, padding:"12px 18px", marginBottom:20, fontSize:13, color: c.color, display:"flex", alignItems:"center", gap:10 }}>
+            <span style={{ background: c.border, color:"white", borderRadius:"50%", width:20, height:20, display:"inline-flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:700, flexShrink:0 }}>{c.icon}</span>
             {insight.msg}
           </div>
-        )}
+        ); })()}
 
+        {/* Compare Mode */}
         {compareMode && compareData && (
-          <div style={{ background:"#292b31", borderRadius:12, padding:24, marginBottom:24, border:"1px solid #3c3e48" }}>
-            <div style={{ fontSize:16, fontWeight:600, marginBottom:16, color:"#ecedf7" }}>⚖️ Country Comparison</div>
+          <div style={{ background: Y.cardBg, borderRadius:12, padding:24, marginBottom:20, border:`1px solid ${Y.border}` }}>
+            <div style={{ fontSize:15, fontWeight:600, marginBottom:16, color: Y.dark }}>Country Comparison</div>
             <div style={{ display:"flex", gap:12, marginBottom:20 }}>
               <select value={compareA} onChange={e=>setCompareA(e.target.value)} style={selectStyle}>
                 {["Brazil","Mexico","Colombia","Spain"].map(c=><option key={c} value={c}>{c}</option>)}
               </select>
-              <span style={{ alignSelf:"center", color:"#a4a5ac" }}>vs</span>
+              <span style={{ alignSelf:"center", color: Y.gray, fontWeight:600 }}>vs</span>
               <select value={compareB} onChange={e=>setCompareB(e.target.value)} style={selectStyle}>
                 {["Brazil","Mexico","Colombia","Spain"].map(c=><option key={c} value={c}>{c}</option>)}
               </select>
@@ -232,10 +268,10 @@ export default function App() {
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:24 }}>
               {[compareData.a, compareData.b].map(d => (
                 <div key={d.label}>
-                  <div style={{ fontWeight:600, color:"#afb6ee", marginBottom:12 }}>{d.label}</div>
+                  <div style={{ fontWeight:600, color: Y.primary, marginBottom:12, fontSize:14 }}>{d.label}</div>
                   <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
-                    <KPI label="Auth Rate" value={`${d.authRate}%`} color={parseFloat(d.authRate)>80?"#10b981":"#f59e0b"} sub="" />
-                    <KPI label="Volume" value={fmt(d.total)} color="#4958e2" sub="" />
+                    <KPI label="Auth Rate" value={`${d.authRate}%`} color={parseFloat(d.authRate)>80 ? Y.success : Y.warn} bg={parseFloat(d.authRate)>80 ? Y.successBg : Y.warnBg} sub="" />
+                    <KPI label="Volume" value={fmt(d.total)} color={Y.primary} bg={Y.primaryBg} sub="" />
                   </div>
                   <MiniBar stages={[{name:"Validation",val:d.passedValidation},{name:"Auth",val:d.passedAuth},{name:"Captured",val:d.captured}]} max={d.total} />
                 </div>
@@ -244,147 +280,152 @@ export default function App() {
           </div>
         )}
 
-        <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr", gap:24, marginBottom:24 }}>
-          <div style={{ background:"#292b31", borderRadius:12, padding:24, border:"1px solid #3c3e48" }}>
-            <div style={{ fontSize:16, fontWeight:600, marginBottom:4, color:"#ecedf7" }}>Payment Flow Funnel</div>
-            <div style={{ fontSize:12, color:"#a4a5ac", marginBottom:20 }}>Click a stage to see failure breakdown</div>
-            <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"center", gap:0, position:"relative" }}>
+        <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr", gap:20, marginBottom:20 }}>
+
+          {/* Funnel */}
+          <div style={{ background: Y.cardBg, borderRadius:12, padding:24, border:`1px solid ${Y.border}` }}>
+            <div style={{ fontSize:15, fontWeight:600, marginBottom:4, color: Y.dark }}>Payment Flow Funnel</div>
+            <div style={{ fontSize:12, color: Y.gray, marginBottom:24 }}>Click a stage to see failure breakdown</div>
+            <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"center", gap:0 }}>
               {[
-                { key:"validation", label:"Validation", total: funnel.total, passed: funnel.passedValidation, failed: funnel.failedValidation, color:"#4958e2" },
-                { key:"authorization", label:"Authorization", total: funnel.passedValidation, passed: funnel.passedAuth, failed: funnel.failedAuth, color:"#5463e3" },
-                { key:"capture", label:"Capture", total: funnel.passedAuth, passed: funnel.captured, failed: funnel.failedCapture, color:"#10b981" },
+                { key:"validation",    label:"Validation",    total: funnel.total,           passed: funnel.passedValidation, failed: funnel.failedValidation, color: Y.primary },
+                { key:"authorization", label:"Authorization", total: funnel.passedValidation, passed: funnel.passedAuth,       failed: funnel.failedAuth,       color: Y.primary2 },
+                { key:"capture",       label:"Capture",       total: funnel.passedAuth,       passed: funnel.captured,         failed: funnel.failedCapture,    color: Y.success },
               ].map((stage, idx) => {
                 const h = stageH(stage.passed, funnel.total);
                 const isActive = activeStage === stage.key;
                 return (
-                  <div key={stage.key} style={{ display:"flex", alignItems:"flex-end", gap:0 }}>
+                  <div key={stage.key} style={{ display:"flex", alignItems:"flex-end" }}>
                     {idx > 0 && (
-                      <div style={{ width:30, display:"flex", alignItems:"flex-end", marginBottom:0 }}>
-                        <div style={{ width:0, height:0, borderTop:`${stageH([funnel.passedValidation,funnel.passedAuth][idx-1], funnel.total)/2}px solid transparent`, borderBottom:`${stageH([funnel.passedValidation,funnel.passedAuth][idx-1], funnel.total)/2}px solid transparent`, borderLeft:`30px solid ${["#4958e2","#5463e3"][idx-1]}`, opacity:0.4 }} />
+                      <div style={{ width:28, display:"flex", alignItems:"flex-end" }}>
+                        <div style={{ width:0, height:0, borderTop:`${stageH([funnel.passedValidation,funnel.passedAuth][idx-1], funnel.total)/2}px solid transparent`, borderBottom:`${stageH([funnel.passedValidation,funnel.passedAuth][idx-1], funnel.total)/2}px solid transparent`, borderLeft:`28px solid ${[Y.primary,Y.primary2][idx-1]}`, opacity:0.25 }} />
                       </div>
                     )}
                     <div onClick={() => setActiveStage(isActive ? null : stage.key)} style={{ cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center" }}>
-                      <div style={{ fontSize:13, fontWeight:600, color:"#afb6ee", marginBottom:6 }}>{fmt(stage.passed)}</div>
-                      <div style={{ width:140, height:h, background: isActive ? stage.color : stage.color+"99", borderRadius:8, border: isActive?`2px solid ${stage.color}`:"2px solid transparent", transition:"all 0.2s", display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center", position:"relative" }}>
-                        <div style={{ fontSize:13, fontWeight:700, color:"white" }}>{stage.label}</div>
-                        <div style={{ fontSize:11, color:"rgba(255,255,255,0.7)" }}>{pct(stage.passed, stage.total)} pass</div>
+                      <div style={{ fontSize:12, fontWeight:600, color: Y.dark, marginBottom:6 }}>{fmt(stage.passed)}</div>
+                      <div style={{ width:130, height:h, background: isActive ? stage.color : stage.color+"22", border:`2px solid ${isActive ? stage.color : stage.color+"55"}`, borderRadius:8, transition:"all 0.2s", display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center", position:"relative" }}>
+                        <div style={{ fontSize:12, fontWeight:700, color: isActive ? "white" : stage.color }}>{stage.label}</div>
+                        <div style={{ fontSize:11, color: isActive ? "rgba(255,255,255,0.8)" : Y.gray }}>{pct(stage.passed, stage.total)} pass</div>
                         {stage.failed > 0 && (
-                          <div style={{ position:"absolute", top:-10, right:-10, background:"#ef4444", borderRadius:20, padding:"2px 8px", fontSize:11, fontWeight:700, color:"white" }}>
+                          <div style={{ position:"absolute", top:-10, right:-10, background: Y.error, borderRadius:20, padding:"2px 8px", fontSize:11, fontWeight:700, color:"white" }}>
                             -{fmt(stage.failed)}
                           </div>
                         )}
                       </div>
-                      <div style={{ fontSize:11, color:"#a4a5ac", marginTop:6 }}>{stage.label}</div>
+                      <div style={{ fontSize:11, color: Y.gray, marginTop:6 }}>{stage.label}</div>
                     </div>
                   </div>
                 );
               })}
-              <div style={{ display:"flex", alignItems:"flex-end", gap:0 }}>
-                <div style={{ width:30, display:"flex", alignItems:"flex-end" }}>
-                  <div style={{ width:0, height:0, borderTop:`${stageH(funnel.passedAuth, funnel.total)/2}px solid transparent`, borderBottom:`${stageH(funnel.passedAuth, funnel.total)/2}px solid transparent`, borderLeft:`30px solid #10b98166` }} />
+              <div style={{ display:"flex", alignItems:"flex-end" }}>
+                <div style={{ width:28, display:"flex", alignItems:"flex-end" }}>
+                  <div style={{ width:0, height:0, borderTop:`${stageH(funnel.passedAuth, funnel.total)/2}px solid transparent`, borderBottom:`${stageH(funnel.passedAuth, funnel.total)/2}px solid transparent`, borderLeft:`28px solid ${Y.success}44` }} />
                 </div>
                 <div style={{ display:"flex", flexDirection:"column", alignItems:"center" }}>
-                  <div style={{ fontSize:13, fontWeight:600, color:"#10b981", marginBottom:6 }}>{fmt(funnel.captured)}</div>
-                  <div style={{ width:100, height:stageH(funnel.captured, funnel.total), background:"#10b98133", borderRadius:8, border:"2px solid #10b981", display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center" }}>
-                    <div style={{ fontSize:12, fontWeight:700, color:"#10b981" }}>✓ Done</div>
-                    <div style={{ fontSize:11, color:"#10b981" }}>{pct(funnel.captured, funnel.total)}</div>
+                  <div style={{ fontSize:12, fontWeight:600, color: Y.success, marginBottom:6 }}>{fmt(funnel.captured)}</div>
+                  <div style={{ width:90, height:stageH(funnel.captured, funnel.total), background: Y.successBg, borderRadius:8, border:`2px solid ${Y.success}`, display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center" }}>
+                    <div style={{ fontSize:12, fontWeight:700, color: Y.success }}>✓</div>
+                    <div style={{ fontSize:11, color: Y.success }}>{pct(funnel.captured, funnel.total)}</div>
                   </div>
-                  <div style={{ fontSize:11, color:"#a4a5ac", marginTop:6 }}>Captured</div>
+                  <div style={{ fontSize:11, color: Y.gray, marginTop:6 }}>Captured</div>
                 </div>
               </div>
             </div>
 
             {activeStage && funnel.reasonsByStage[activeStage]?.length > 0 && (
-              <div style={{ marginTop:24, background:"#1a1c22", borderRadius:10, padding:16, border:"1px solid #3c3e48" }}>
-                <div style={{ fontSize:13, fontWeight:600, color:"#ecedf7", marginBottom:12 }}>
-                  🔍 Failure Breakdown — {activeStage.charAt(0).toUpperCase()+activeStage.slice(1)} Stage
+              <div style={{ marginTop:20, background: Y.pageBg, borderRadius:10, padding:16, border:`1px solid ${Y.border}` }}>
+                <div style={{ fontSize:13, fontWeight:600, color: Y.dark, marginBottom:12 }}>
+                  Failure Breakdown — {activeStage.charAt(0).toUpperCase()+activeStage.slice(1)}
                 </div>
                 {funnel.reasonsByStage[activeStage].map(r => (
                   <div key={r.reason} style={{ marginBottom:8 }}>
-                    <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, color:"#afb6ee", marginBottom:3 }}>
-                      <span>{r.reason}</span><span>{r.pct}% · {fmt(r.count)}</span>
+                    <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, color: Y.dark, marginBottom:3 }}>
+                      <span>{r.reason}</span><span style={{ color: Y.gray }}>{r.pct}% · {fmt(r.count)}</span>
                     </div>
-                    <div style={{ height:6, background:"#3c3e48", borderRadius:3 }}>
-                      <div style={{ height:6, width:`${r.pct}%`, background:"#ef4444", borderRadius:3 }} />
+                    <div style={{ height:6, background: Y.border, borderRadius:3 }}>
+                      <div style={{ height:6, width:`${r.pct}%`, background: Y.error, borderRadius:3 }} />
                     </div>
                   </div>
                 ))}
               </div>
             )}
             {activeStage && funnel.reasonsByStage[activeStage]?.length === 0 && (
-              <div style={{ marginTop:16, color:"#10b981", fontSize:13, textAlign:"center" }}>✅ No failures at this stage</div>
+              <div style={{ marginTop:16, color: Y.success, fontSize:13, textAlign:"center", fontWeight:500 }}>No failures at this stage</div>
             )}
           </div>
 
-          <div style={{ background:"#292b31", borderRadius:12, padding:24, border:"1px solid #3c3e48" }}>
-            <div style={{ fontSize:16, fontWeight:600, marginBottom:4, color:"#ecedf7" }}>Auth Rate by Method</div>
-            <div style={{ fontSize:12, color:"#a4a5ac", marginBottom:16 }}>Higher is better</div>
+          {/* Method Breakdown */}
+          <div style={{ background: Y.cardBg, borderRadius:12, padding:24, border:`1px solid ${Y.border}` }}>
+            <div style={{ fontSize:15, fontWeight:600, marginBottom:4, color: Y.dark }}>Auth Rate by Method</div>
+            <div style={{ fontSize:12, color: Y.gray, marginBottom:20 }}>Higher is better</div>
             {methodBreakdown.map(m => (
-              <div key={m.method} style={{ marginBottom:12 }}>
-                <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, color:"#afb6ee", marginBottom:3 }}>
+              <div key={m.method} style={{ marginBottom:14 }}>
+                <div style={{ display:"flex", justifyContent:"space-between", fontSize:13, color: Y.dark, marginBottom:4 }}>
                   <span>{m.method}</span>
-                  <span style={{ fontWeight:600, color: m.authRate>85?"#10b981":m.authRate>75?"#f59e0b":"#ef4444" }}>{m.authRate}%</span>
+                  <span style={{ fontWeight:600, color: m.authRate>85 ? Y.success : m.authRate>75 ? Y.warn : Y.error }}>{m.authRate}%</span>
                 </div>
-                <div style={{ height:8, background:"#3c3e48", borderRadius:4 }}>
-                  <div style={{ height:8, width:`${m.authRate}%`, background: m.authRate>85?"#10b981":m.authRate>75?"#f59e0b":"#ef4444", borderRadius:4, transition:"width 0.3s" }} />
+                <div style={{ height:8, background: Y.primaryBg, borderRadius:4 }}>
+                  <div style={{ height:8, width:`${m.authRate}%`, background: m.authRate>85 ? Y.success : m.authRate>75 ? Y.primary : Y.error, borderRadius:4, transition:"width 0.3s" }} />
                 </div>
-                <div style={{ fontSize:10, color:"#a4a5ac", marginTop:2 }}>{fmt(m.volume)} txns</div>
+                <div style={{ fontSize:11, color: Y.gray, marginTop:2 }}>{fmt(m.volume)} transactions</div>
               </div>
             ))}
           </div>
         </div>
 
-        <div style={{ background:"#292b31", borderRadius:12, padding:24, border:"1px solid #3c3e48", marginBottom:24 }}>
-          <div style={{ fontSize:16, fontWeight:600, marginBottom:4, color:"#ecedf7" }}>Authorization Rate Trend</div>
-          <div style={{ fontSize:12, color:"#a4a5ac", marginBottom:16 }}>Daily auth rate over selected period</div>
+        {/* Trend Chart */}
+        <div style={{ background: Y.cardBg, borderRadius:12, padding:24, border:`1px solid ${Y.border}`, marginBottom:20 }}>
+          <div style={{ fontSize:15, fontWeight:600, marginBottom:4, color: Y.dark }}>Authorization Rate Trend</div>
+          <div style={{ fontSize:12, color: Y.gray, marginBottom:16 }}>Daily auth rate over selected period</div>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={trendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#3c3e48" />
-              <XAxis dataKey="date" stroke="#a4a5ac" tick={{fontSize:11}} interval={Math.floor(trendData.length/6)} />
-              <YAxis stroke="#a4a5ac" tick={{fontSize:11}} domain={[50,100]} unit="%" />
-              <Tooltip contentStyle={{background:"#292b31",border:"1px solid #3c3e48",borderRadius:8,color:"#ecedf7"}} />
-              <Line type="monotone" dataKey="authRate" stroke="#4958e2" strokeWidth={2} dot={false} name="Auth Rate %" />
+              <CartesianGrid strokeDasharray="3 3" stroke={Y.border} />
+              <XAxis dataKey="date" stroke={Y.gray} tick={{fontSize:11, fill: Y.gray}} interval={Math.floor(trendData.length/6)} />
+              <YAxis stroke={Y.gray} tick={{fontSize:11, fill: Y.gray}} domain={[50,100]} unit="%" />
+              <Tooltip contentStyle={{ background:"white", border:`1px solid ${Y.border}`, borderRadius:8, color: Y.dark, fontSize:12 }} />
+              <Line type="monotone" dataKey="authRate" stroke={Y.primary} strokeWidth={2.5} dot={false} name="Auth Rate %" />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
-        <div style={{ background:"#292b31", borderRadius:12, padding:24, border:"1px solid #3c3e48" }}>
-          <div style={{ fontSize:16, fontWeight:600, marginBottom:4, color:"#ecedf7" }}>Volume by Country</div>
-          <div style={{ fontSize:12, color:"#a4a5ac", marginBottom:16 }}>Transaction volume breakdown</div>
+        {/* Country Volume */}
+        <div style={{ background: Y.cardBg, borderRadius:12, padding:24, border:`1px solid ${Y.border}` }}>
+          <div style={{ fontSize:15, fontWeight:600, marginBottom:4, color: Y.dark }}>Volume by Country</div>
+          <div style={{ fontSize:12, color: Y.gray, marginBottom:16 }}>Transaction volume breakdown</div>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={["Brazil","Mexico","Colombia","Spain"].map(c => ({
               country: c,
               volume: filtered.filter(t=>t.country===c).length,
-              authRate: parseFloat(computeFunnel(filtered.filter(t=>t.country===c)).authRate)
             }))}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#3c3e48" />
-              <XAxis dataKey="country" stroke="#a4a5ac" tick={{fontSize:12}} />
-              <YAxis stroke="#a4a5ac" tick={{fontSize:11}} />
-              <Tooltip contentStyle={{background:"#292b31",border:"1px solid #3c3e48",borderRadius:8,color:"#ecedf7"}} />
-              <Bar dataKey="volume" fill="#4958e2" radius={[4,4,0,0]} name="Transactions" />
+              <CartesianGrid strokeDasharray="3 3" stroke={Y.border} />
+              <XAxis dataKey="country" stroke={Y.gray} tick={{fontSize:12, fill: Y.dark}} />
+              <YAxis stroke={Y.gray} tick={{fontSize:11, fill: Y.gray}} />
+              <Tooltip contentStyle={{ background:"white", border:`1px solid ${Y.border}`, borderRadius:8, color: Y.dark, fontSize:12 }} />
+              <Bar dataKey="volume" fill={Y.primary} radius={[6,6,0,0]} name="Transactions" />
             </BarChart>
           </ResponsiveContainer>
         </div>
+
       </div>
     </div>
   );
 }
 
 // ─── SUBCOMPONENTS ──────────────────────────────────────────────────────────────
-function KPI({ label, value, sub, color }) {
+function KPI({ label, value, sub, color, bg }) {
   return (
-    <div style={{ background:"#292b31", borderRadius:10, padding:16, border:"1px solid #3c3e48" }}>
-      <div style={{ fontSize:12, color:"#a4a5ac", marginBottom:4 }}>{label}</div>
-      <div style={{ fontSize:26, fontWeight:700, color }}>{value}</div>
-      {sub && <div style={{ fontSize:11, color:"#a4a5ac", marginTop:2 }}>{sub}</div>}
+    <div style={{ background: bg || "#f4f5fb", borderRadius:12, padding:20, border:`1px solid ${color}33` }}>
+      <div style={{ fontSize:12, color:"#a4a5ac", marginBottom:6, fontWeight:500 }}>{label}</div>
+      <div style={{ fontSize:28, fontWeight:700, color, lineHeight:1.1 }}>{value}</div>
+      {sub && <div style={{ fontSize:11, color:"#a4a5ac", marginTop:4 }}>{sub}</div>}
     </div>
   );
 }
 
 function FilterBadge({ label, children }) {
   return (
-    <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
-      <span style={{ fontSize:10, color:"#a4a5ac", textTransform:"uppercase", letterSpacing:1 }}>{label}</span>
+    <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
+      <span style={{ fontSize:10, color:"#a4a5ac", textTransform:"uppercase", letterSpacing:"0.08em", fontWeight:600 }}>{label}</span>
       {children}
     </div>
   );
@@ -392,9 +433,9 @@ function FilterBadge({ label, children }) {
 
 function Tag({ label, onRemove }) {
   return (
-    <span style={{ background:"#2c3299", color:"#afb6ee", fontSize:12, padding:"4px 10px", borderRadius:20, display:"inline-flex", alignItems:"center", gap:6 }}>
+    <span style={{ background:"#ecedf7", color:"#4958e2", fontSize:12, padding:"4px 12px", borderRadius:20, display:"inline-flex", alignItems:"center", gap:6, border:"1px solid #afb6ee", fontWeight:500 }}>
       {label}
-      <span onClick={onRemove} style={{ cursor:"pointer", color:"#808be8" }}>×</span>
+      <span onClick={onRemove} style={{ cursor:"pointer", color:"#808be8", fontSize:14, lineHeight:1 }}>×</span>
     </span>
   );
 }
@@ -404,10 +445,10 @@ function MiniBar({ stages, max }) {
     <div style={{ marginTop:12 }}>
       {stages.map(s => (
         <div key={s.name} style={{ marginBottom:8 }}>
-          <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, color:"#afb6ee", marginBottom:2 }}>
-            <span>{s.name}</span><span>{fmt(s.val)}</span>
+          <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, color:"#a4a5ac", marginBottom:3 }}>
+            <span>{s.name}</span><span style={{ fontWeight:500, color:"#292b31" }}>{fmt(s.val)}</span>
           </div>
-          <div style={{ height:6, background:"#3c3e48", borderRadius:3 }}>
+          <div style={{ height:6, background:"#ecedf7", borderRadius:3 }}>
             <div style={{ height:6, width:`${(s.val/max)*100}%`, background:"#4958e2", borderRadius:3 }} />
           </div>
         </div>
@@ -416,4 +457,4 @@ function MiniBar({ stages, max }) {
   );
 }
 
-const selectStyle = { background:"#1a1c22", color:"#ecedf7", border:"1px solid #3c3e48", borderRadius:8, padding:"8px 12px", fontSize:13, cursor:"pointer", outline:"none" };
+const selectStyle = { background:"white", color:"#292b31", border:"1px solid #e2e4f0", borderRadius:8, padding:"8px 12px", fontSize:13, cursor:"pointer", outline:"none", minWidth:140 };
