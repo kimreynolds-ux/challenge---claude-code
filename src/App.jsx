@@ -156,13 +156,13 @@ export default function App() {
   const stageH = (val, max) => Math.max(40, (val / max) * 180);
 
   return (
-    <div style={{ background:"#0f172a", minHeight:"100vh", color:"#e2e8f0", fontFamily:"'Inter',sans-serif", padding:"0" }}>
-      <div style={{ background:"#1e293b", borderBottom:"1px solid #334155", padding:"16px 32px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+    <div style={{ background:"#1a1c22", minHeight:"100vh", color:"#ecedf7", fontFamily:"'Inter', 'DM Sans', sans-serif", padding:"0" }}>
+      <div style={{ background:"#292b31", borderBottom:"1px solid #3c3e48", padding:"16px 32px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
         <div>
-          <div style={{ fontSize:20, fontWeight:700, color:"#f1f5f9" }}>✈️ TravelHub</div>
-          <div style={{ fontSize:12, color:"#94a3b8" }}>Payment Intelligence Dashboard</div>
+          <div style={{ fontSize:20, fontWeight:700, color:"#ecedf7" }}>✈️ TravelHub</div>
+          <div style={{ fontSize:12, color:"#afb6ee" }}>Payment Intelligence Dashboard</div>
         </div>
-        <div style={{ fontSize:12, color:"#64748b" }}>
+        <div style={{ fontSize:12, color:"#a4a5ac" }}>
           {fmt(filtered.length)} transactions · Last {filterDays} days
         </div>
       </div>
@@ -188,10 +188,10 @@ export default function App() {
               <option value={30}>Last 30 days</option>
             </select>
           </FilterBadge>
-          <button onClick={()=>{setFilterMethod("all");setFilterCountry("all");setFilterDays(30);}} style={{ background:"#334155", border:"none", color:"#94a3b8", padding:"8px 14px", borderRadius:8, cursor:"pointer", fontSize:12 }}>
+          <button onClick={()=>{setFilterMethod("all");setFilterCountry("all");setFilterDays(30);}} style={{ background:"#3c3e48", border:"none", color:"#afb6ee", padding:"8px 14px", borderRadius:8, cursor:"pointer", fontSize:12 }}>
             ↺ Reset
           </button>
-          <button onClick={()=>setCompareMode(!compareMode)} style={{ background: compareMode?"#6366f1":"#334155", border:"none", color: compareMode?"white":"#94a3b8", padding:"8px 14px", borderRadius:8, cursor:"pointer", fontSize:12, marginLeft:"auto" }}>
+          <button onClick={()=>setCompareMode(!compareMode)} style={{ background: compareMode?"#4958e2":"#3c3e48", border:"none", color: compareMode?"white":"#afb6ee", padding:"8px 14px", borderRadius:8, cursor:"pointer", fontSize:12, marginLeft:"auto" }}>
             ⚖️ Compare Mode
           </button>
         </div>
@@ -206,25 +206,25 @@ export default function App() {
 
         <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:16, marginBottom:24 }}>
           <KPI label="Auth Rate" value={`${funnel.authRate}%`} sub={`${fmt(funnel.passedAuth)} approved`} color={parseFloat(funnel.authRate)>80?"#10b981":parseFloat(funnel.authRate)>70?"#f59e0b":"#ef4444"} />
-          <KPI label="Total Transactions" value={fmt(funnel.total)} sub={`${fmt(funnel.captured)} captured`} color="#6366f1" />
+          <KPI label="Total Transactions" value={fmt(funnel.total)} sub={`${fmt(funnel.captured)} captured`} color="#4958e2" />
           <KPI label="Soft Declines" value={pct(funnel.softDeclines, funnel.authFailed)} sub={`${fmt(funnel.softDeclines)} retryable`} color="#f59e0b" />
           <KPI label="Hard Declines" value={pct(funnel.hardDeclines, funnel.authFailed)} sub={`${fmt(funnel.hardDeclines)} permanent`} color="#ef4444" />
         </div>
 
         {insight && (
-          <div style={{ background: insight.type==="warn"?"#7c2d12":insight.type==="good"?"#14532d":"#1e3a5f", border:`1px solid ${insight.type==="warn"?"#dc2626":insight.type==="good"?"#16a34a":"#3b82f6"}`, borderRadius:10, padding:"12px 18px", marginBottom:24, fontSize:14, color:"#f1f5f9" }}>
+          <div style={{ background: insight.type==="warn"?"#7c2d12":insight.type==="good"?"#14532d":"#1e3a5f", border:`1px solid ${insight.type==="warn"?"#dc2626":insight.type==="good"?"#16a34a":"#5463e3"}`, borderRadius:10, padding:"12px 18px", marginBottom:24, fontSize:14, color:"#ecedf7" }}>
             {insight.msg}
           </div>
         )}
 
         {compareMode && compareData && (
-          <div style={{ background:"#1e293b", borderRadius:12, padding:24, marginBottom:24, border:"1px solid #334155" }}>
-            <div style={{ fontSize:16, fontWeight:600, marginBottom:16, color:"#f1f5f9" }}>⚖️ Country Comparison</div>
+          <div style={{ background:"#292b31", borderRadius:12, padding:24, marginBottom:24, border:"1px solid #3c3e48" }}>
+            <div style={{ fontSize:16, fontWeight:600, marginBottom:16, color:"#ecedf7" }}>⚖️ Country Comparison</div>
             <div style={{ display:"flex", gap:12, marginBottom:20 }}>
               <select value={compareA} onChange={e=>setCompareA(e.target.value)} style={selectStyle}>
                 {["Brazil","Mexico","Colombia","Spain"].map(c=><option key={c} value={c}>{c}</option>)}
               </select>
-              <span style={{ alignSelf:"center", color:"#64748b" }}>vs</span>
+              <span style={{ alignSelf:"center", color:"#a4a5ac" }}>vs</span>
               <select value={compareB} onChange={e=>setCompareB(e.target.value)} style={selectStyle}>
                 {["Brazil","Mexico","Colombia","Spain"].map(c=><option key={c} value={c}>{c}</option>)}
               </select>
@@ -232,10 +232,10 @@ export default function App() {
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:24 }}>
               {[compareData.a, compareData.b].map(d => (
                 <div key={d.label}>
-                  <div style={{ fontWeight:600, color:"#94a3b8", marginBottom:12 }}>{d.label}</div>
+                  <div style={{ fontWeight:600, color:"#afb6ee", marginBottom:12 }}>{d.label}</div>
                   <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
                     <KPI label="Auth Rate" value={`${d.authRate}%`} color={parseFloat(d.authRate)>80?"#10b981":"#f59e0b"} sub="" />
-                    <KPI label="Volume" value={fmt(d.total)} color="#6366f1" sub="" />
+                    <KPI label="Volume" value={fmt(d.total)} color="#4958e2" sub="" />
                   </div>
                   <MiniBar stages={[{name:"Validation",val:d.passedValidation},{name:"Auth",val:d.passedAuth},{name:"Captured",val:d.captured}]} max={d.total} />
                 </div>
@@ -245,13 +245,13 @@ export default function App() {
         )}
 
         <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr", gap:24, marginBottom:24 }}>
-          <div style={{ background:"#1e293b", borderRadius:12, padding:24, border:"1px solid #334155" }}>
-            <div style={{ fontSize:16, fontWeight:600, marginBottom:4, color:"#f1f5f9" }}>Payment Flow Funnel</div>
-            <div style={{ fontSize:12, color:"#64748b", marginBottom:20 }}>Click a stage to see failure breakdown</div>
+          <div style={{ background:"#292b31", borderRadius:12, padding:24, border:"1px solid #3c3e48" }}>
+            <div style={{ fontSize:16, fontWeight:600, marginBottom:4, color:"#ecedf7" }}>Payment Flow Funnel</div>
+            <div style={{ fontSize:12, color:"#a4a5ac", marginBottom:20 }}>Click a stage to see failure breakdown</div>
             <div style={{ display:"flex", alignItems:"flex-end", justifyContent:"center", gap:0, position:"relative" }}>
               {[
-                { key:"validation", label:"Validation", total: funnel.total, passed: funnel.passedValidation, failed: funnel.failedValidation, color:"#6366f1" },
-                { key:"authorization", label:"Authorization", total: funnel.passedValidation, passed: funnel.passedAuth, failed: funnel.failedAuth, color:"#3b82f6" },
+                { key:"validation", label:"Validation", total: funnel.total, passed: funnel.passedValidation, failed: funnel.failedValidation, color:"#4958e2" },
+                { key:"authorization", label:"Authorization", total: funnel.passedValidation, passed: funnel.passedAuth, failed: funnel.failedAuth, color:"#5463e3" },
                 { key:"capture", label:"Capture", total: funnel.passedAuth, passed: funnel.captured, failed: funnel.failedCapture, color:"#10b981" },
               ].map((stage, idx) => {
                 const h = stageH(stage.passed, funnel.total);
@@ -260,11 +260,11 @@ export default function App() {
                   <div key={stage.key} style={{ display:"flex", alignItems:"flex-end", gap:0 }}>
                     {idx > 0 && (
                       <div style={{ width:30, display:"flex", alignItems:"flex-end", marginBottom:0 }}>
-                        <div style={{ width:0, height:0, borderTop:`${stageH([funnel.passedValidation,funnel.passedAuth][idx-1], funnel.total)/2}px solid transparent`, borderBottom:`${stageH([funnel.passedValidation,funnel.passedAuth][idx-1], funnel.total)/2}px solid transparent`, borderLeft:`30px solid ${["#6366f1","#3b82f6"][idx-1]}`, opacity:0.4 }} />
+                        <div style={{ width:0, height:0, borderTop:`${stageH([funnel.passedValidation,funnel.passedAuth][idx-1], funnel.total)/2}px solid transparent`, borderBottom:`${stageH([funnel.passedValidation,funnel.passedAuth][idx-1], funnel.total)/2}px solid transparent`, borderLeft:`30px solid ${["#4958e2","#5463e3"][idx-1]}`, opacity:0.4 }} />
                       </div>
                     )}
                     <div onClick={() => setActiveStage(isActive ? null : stage.key)} style={{ cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center" }}>
-                      <div style={{ fontSize:13, fontWeight:600, color:"#94a3b8", marginBottom:6 }}>{fmt(stage.passed)}</div>
+                      <div style={{ fontSize:13, fontWeight:600, color:"#afb6ee", marginBottom:6 }}>{fmt(stage.passed)}</div>
                       <div style={{ width:140, height:h, background: isActive ? stage.color : stage.color+"99", borderRadius:8, border: isActive?`2px solid ${stage.color}`:"2px solid transparent", transition:"all 0.2s", display:"flex", flexDirection:"column", justifyContent:"center", alignItems:"center", position:"relative" }}>
                         <div style={{ fontSize:13, fontWeight:700, color:"white" }}>{stage.label}</div>
                         <div style={{ fontSize:11, color:"rgba(255,255,255,0.7)" }}>{pct(stage.passed, stage.total)} pass</div>
@@ -274,7 +274,7 @@ export default function App() {
                           </div>
                         )}
                       </div>
-                      <div style={{ fontSize:11, color:"#64748b", marginTop:6 }}>{stage.label}</div>
+                      <div style={{ fontSize:11, color:"#a4a5ac", marginTop:6 }}>{stage.label}</div>
                     </div>
                   </div>
                 );
@@ -289,22 +289,22 @@ export default function App() {
                     <div style={{ fontSize:12, fontWeight:700, color:"#10b981" }}>✓ Done</div>
                     <div style={{ fontSize:11, color:"#10b981" }}>{pct(funnel.captured, funnel.total)}</div>
                   </div>
-                  <div style={{ fontSize:11, color:"#64748b", marginTop:6 }}>Captured</div>
+                  <div style={{ fontSize:11, color:"#a4a5ac", marginTop:6 }}>Captured</div>
                 </div>
               </div>
             </div>
 
             {activeStage && funnel.reasonsByStage[activeStage]?.length > 0 && (
-              <div style={{ marginTop:24, background:"#0f172a", borderRadius:10, padding:16, border:"1px solid #334155" }}>
-                <div style={{ fontSize:13, fontWeight:600, color:"#f1f5f9", marginBottom:12 }}>
+              <div style={{ marginTop:24, background:"#1a1c22", borderRadius:10, padding:16, border:"1px solid #3c3e48" }}>
+                <div style={{ fontSize:13, fontWeight:600, color:"#ecedf7", marginBottom:12 }}>
                   🔍 Failure Breakdown — {activeStage.charAt(0).toUpperCase()+activeStage.slice(1)} Stage
                 </div>
                 {funnel.reasonsByStage[activeStage].map(r => (
                   <div key={r.reason} style={{ marginBottom:8 }}>
-                    <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, color:"#94a3b8", marginBottom:3 }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, color:"#afb6ee", marginBottom:3 }}>
                       <span>{r.reason}</span><span>{r.pct}% · {fmt(r.count)}</span>
                     </div>
-                    <div style={{ height:6, background:"#334155", borderRadius:3 }}>
+                    <div style={{ height:6, background:"#3c3e48", borderRadius:3 }}>
                       <div style={{ height:6, width:`${r.pct}%`, background:"#ef4444", borderRadius:3 }} />
                     </div>
                   </div>
@@ -316,52 +316,52 @@ export default function App() {
             )}
           </div>
 
-          <div style={{ background:"#1e293b", borderRadius:12, padding:24, border:"1px solid #334155" }}>
-            <div style={{ fontSize:16, fontWeight:600, marginBottom:4, color:"#f1f5f9" }}>Auth Rate by Method</div>
-            <div style={{ fontSize:12, color:"#64748b", marginBottom:16 }}>Higher is better</div>
+          <div style={{ background:"#292b31", borderRadius:12, padding:24, border:"1px solid #3c3e48" }}>
+            <div style={{ fontSize:16, fontWeight:600, marginBottom:4, color:"#ecedf7" }}>Auth Rate by Method</div>
+            <div style={{ fontSize:12, color:"#a4a5ac", marginBottom:16 }}>Higher is better</div>
             {methodBreakdown.map(m => (
               <div key={m.method} style={{ marginBottom:12 }}>
-                <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, color:"#94a3b8", marginBottom:3 }}>
+                <div style={{ display:"flex", justifyContent:"space-between", fontSize:12, color:"#afb6ee", marginBottom:3 }}>
                   <span>{m.method}</span>
                   <span style={{ fontWeight:600, color: m.authRate>85?"#10b981":m.authRate>75?"#f59e0b":"#ef4444" }}>{m.authRate}%</span>
                 </div>
-                <div style={{ height:8, background:"#334155", borderRadius:4 }}>
+                <div style={{ height:8, background:"#3c3e48", borderRadius:4 }}>
                   <div style={{ height:8, width:`${m.authRate}%`, background: m.authRate>85?"#10b981":m.authRate>75?"#f59e0b":"#ef4444", borderRadius:4, transition:"width 0.3s" }} />
                 </div>
-                <div style={{ fontSize:10, color:"#475569", marginTop:2 }}>{fmt(m.volume)} txns</div>
+                <div style={{ fontSize:10, color:"#a4a5ac", marginTop:2 }}>{fmt(m.volume)} txns</div>
               </div>
             ))}
           </div>
         </div>
 
-        <div style={{ background:"#1e293b", borderRadius:12, padding:24, border:"1px solid #334155", marginBottom:24 }}>
-          <div style={{ fontSize:16, fontWeight:600, marginBottom:4, color:"#f1f5f9" }}>Authorization Rate Trend</div>
-          <div style={{ fontSize:12, color:"#64748b", marginBottom:16 }}>Daily auth rate over selected period</div>
+        <div style={{ background:"#292b31", borderRadius:12, padding:24, border:"1px solid #3c3e48", marginBottom:24 }}>
+          <div style={{ fontSize:16, fontWeight:600, marginBottom:4, color:"#ecedf7" }}>Authorization Rate Trend</div>
+          <div style={{ fontSize:12, color:"#a4a5ac", marginBottom:16 }}>Daily auth rate over selected period</div>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={trendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="date" stroke="#475569" tick={{fontSize:11}} interval={Math.floor(trendData.length/6)} />
-              <YAxis stroke="#475569" tick={{fontSize:11}} domain={[50,100]} unit="%" />
-              <Tooltip contentStyle={{background:"#1e293b",border:"1px solid #334155",borderRadius:8,color:"#f1f5f9"}} />
-              <Line type="monotone" dataKey="authRate" stroke="#6366f1" strokeWidth={2} dot={false} name="Auth Rate %" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#3c3e48" />
+              <XAxis dataKey="date" stroke="#a4a5ac" tick={{fontSize:11}} interval={Math.floor(trendData.length/6)} />
+              <YAxis stroke="#a4a5ac" tick={{fontSize:11}} domain={[50,100]} unit="%" />
+              <Tooltip contentStyle={{background:"#292b31",border:"1px solid #3c3e48",borderRadius:8,color:"#ecedf7"}} />
+              <Line type="monotone" dataKey="authRate" stroke="#4958e2" strokeWidth={2} dot={false} name="Auth Rate %" />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
-        <div style={{ background:"#1e293b", borderRadius:12, padding:24, border:"1px solid #334155" }}>
-          <div style={{ fontSize:16, fontWeight:600, marginBottom:4, color:"#f1f5f9" }}>Volume by Country</div>
-          <div style={{ fontSize:12, color:"#64748b", marginBottom:16 }}>Transaction volume breakdown</div>
+        <div style={{ background:"#292b31", borderRadius:12, padding:24, border:"1px solid #3c3e48" }}>
+          <div style={{ fontSize:16, fontWeight:600, marginBottom:4, color:"#ecedf7" }}>Volume by Country</div>
+          <div style={{ fontSize:12, color:"#a4a5ac", marginBottom:16 }}>Transaction volume breakdown</div>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={["Brazil","Mexico","Colombia","Spain"].map(c => ({
               country: c,
               volume: filtered.filter(t=>t.country===c).length,
               authRate: parseFloat(computeFunnel(filtered.filter(t=>t.country===c)).authRate)
             }))}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="country" stroke="#475569" tick={{fontSize:12}} />
-              <YAxis stroke="#475569" tick={{fontSize:11}} />
-              <Tooltip contentStyle={{background:"#1e293b",border:"1px solid #334155",borderRadius:8,color:"#f1f5f9"}} />
-              <Bar dataKey="volume" fill="#6366f1" radius={[4,4,0,0]} name="Transactions" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#3c3e48" />
+              <XAxis dataKey="country" stroke="#a4a5ac" tick={{fontSize:12}} />
+              <YAxis stroke="#a4a5ac" tick={{fontSize:11}} />
+              <Tooltip contentStyle={{background:"#292b31",border:"1px solid #3c3e48",borderRadius:8,color:"#ecedf7"}} />
+              <Bar dataKey="volume" fill="#4958e2" radius={[4,4,0,0]} name="Transactions" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -373,10 +373,10 @@ export default function App() {
 // ─── SUBCOMPONENTS ──────────────────────────────────────────────────────────────
 function KPI({ label, value, sub, color }) {
   return (
-    <div style={{ background:"#1e293b", borderRadius:10, padding:16, border:"1px solid #334155" }}>
-      <div style={{ fontSize:12, color:"#64748b", marginBottom:4 }}>{label}</div>
+    <div style={{ background:"#292b31", borderRadius:10, padding:16, border:"1px solid #3c3e48" }}>
+      <div style={{ fontSize:12, color:"#a4a5ac", marginBottom:4 }}>{label}</div>
       <div style={{ fontSize:26, fontWeight:700, color }}>{value}</div>
-      {sub && <div style={{ fontSize:11, color:"#475569", marginTop:2 }}>{sub}</div>}
+      {sub && <div style={{ fontSize:11, color:"#a4a5ac", marginTop:2 }}>{sub}</div>}
     </div>
   );
 }
@@ -384,7 +384,7 @@ function KPI({ label, value, sub, color }) {
 function FilterBadge({ label, children }) {
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
-      <span style={{ fontSize:10, color:"#64748b", textTransform:"uppercase", letterSpacing:1 }}>{label}</span>
+      <span style={{ fontSize:10, color:"#a4a5ac", textTransform:"uppercase", letterSpacing:1 }}>{label}</span>
       {children}
     </div>
   );
@@ -392,9 +392,9 @@ function FilterBadge({ label, children }) {
 
 function Tag({ label, onRemove }) {
   return (
-    <span style={{ background:"#312e81", color:"#a5b4fc", fontSize:12, padding:"4px 10px", borderRadius:20, display:"inline-flex", alignItems:"center", gap:6 }}>
+    <span style={{ background:"#2c3299", color:"#afb6ee", fontSize:12, padding:"4px 10px", borderRadius:20, display:"inline-flex", alignItems:"center", gap:6 }}>
       {label}
-      <span onClick={onRemove} style={{ cursor:"pointer", color:"#818cf8" }}>×</span>
+      <span onClick={onRemove} style={{ cursor:"pointer", color:"#808be8" }}>×</span>
     </span>
   );
 }
@@ -404,11 +404,11 @@ function MiniBar({ stages, max }) {
     <div style={{ marginTop:12 }}>
       {stages.map(s => (
         <div key={s.name} style={{ marginBottom:8 }}>
-          <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, color:"#94a3b8", marginBottom:2 }}>
+          <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, color:"#afb6ee", marginBottom:2 }}>
             <span>{s.name}</span><span>{fmt(s.val)}</span>
           </div>
-          <div style={{ height:6, background:"#334155", borderRadius:3 }}>
-            <div style={{ height:6, width:`${(s.val/max)*100}%`, background:"#6366f1", borderRadius:3 }} />
+          <div style={{ height:6, background:"#3c3e48", borderRadius:3 }}>
+            <div style={{ height:6, width:`${(s.val/max)*100}%`, background:"#4958e2", borderRadius:3 }} />
           </div>
         </div>
       ))}
@@ -416,4 +416,4 @@ function MiniBar({ stages, max }) {
   );
 }
 
-const selectStyle = { background:"#0f172a", color:"#e2e8f0", border:"1px solid #334155", borderRadius:8, padding:"8px 12px", fontSize:13, cursor:"pointer", outline:"none" };
+const selectStyle = { background:"#1a1c22", color:"#ecedf7", border:"1px solid #3c3e48", borderRadius:8, padding:"8px 12px", fontSize:13, cursor:"pointer", outline:"none" };
