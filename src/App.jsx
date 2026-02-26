@@ -58,6 +58,51 @@ const pct = (a, b) => b === 0 ? "0%" : (a / b * 100).toFixed(1) + "%";
 const METHOD_LABELS = { credit_card:"Credit Card", debit_card:"Debit Card", pix:"PIX", oxxo:"OXXO", pse:"PSE", bank_transfer:"Bank Transfer" };
 const REASON_LABELS = { insufficient_funds:"Insufficient Funds", issuer_timeout:"Issuer Timeout", do_not_honor:"Do Not Honor", processing_error:"Processing Error", expired_card:"Expired Card", invalid_cvv:"Invalid CVV", stolen_card:"Stolen Card", fraud_suspected:"Fraud Suspected", card_blocked:"Card Blocked" };
 
+// ─── PAYMENT METHOD LOGOS ───────────────────────────────────────────────────────
+const METHOD_LOGOS = {
+  credit_card: (
+    <svg width="28" height="20" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="28" height="20" rx="3" fill="#1A1F71"/>
+      <rect y="5" width="28" height="5" fill="#F7B600"/>
+      <rect x="3" y="13" width="7" height="2" rx="1" fill="white" opacity="0.7"/>
+    </svg>
+  ),
+  debit_card: (
+    <svg width="28" height="20" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="28" height="20" rx="3" fill="#EB001B"/>
+      <circle cx="11" cy="10" r="6" fill="#EB001B"/>
+      <circle cx="17" cy="10" r="6" fill="#F79E1B"/>
+      <path d="M14 5.27C15.27 6.27 16.13 7.54 16.13 10C16.13 12.46 15.27 13.73 14 14.73C12.73 13.73 11.87 12.46 11.87 10C11.87 7.54 12.73 6.27 14 5.27Z" fill="#FF5F00"/>
+    </svg>
+  ),
+  pix: (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="#32BCAD"/>
+    </svg>
+  ),
+  oxxo: (
+    <svg width="40" height="20" viewBox="0 0 40 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="40" height="20" rx="3" fill="#E8000A"/>
+      <text x="20" y="14" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" fontFamily="Arial">OXXO</text>
+    </svg>
+  ),
+  pse: (
+    <svg width="36" height="20" viewBox="0 0 36 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="36" height="20" rx="3" fill="#003087"/>
+      <text x="18" y="14" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold" fontFamily="Arial">PSE</text>
+    </svg>
+  ),
+  bank_transfer: (
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="9" width="18" height="11" rx="1" stroke="#4958e2" strokeWidth="1.5" fill="none"/>
+      <path d="M11 2L20 9H2L11 2Z" stroke="#4958e2" strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
+      <rect x="5" y="12" width="3" height="5" rx="0.5" fill="#4958e2"/>
+      <rect x="9.5" y="12" width="3" height="5" rx="0.5" fill="#4958e2"/>
+      <rect x="14" y="12" width="3" height="5" rx="0.5" fill="#4958e2"/>
+    </svg>
+  ),
+};
+
 // ─── YUNO DESIGN TOKENS ─────────────────────────────────────────────────────────
 const Y = {
   primary:   "#4958e2",
@@ -181,13 +226,12 @@ export default function App() {
     <div style={{ background: Y.pageBg, minHeight:"100vh", color: Y.dark, fontFamily:"'Inter', sans-serif" }}>
 
       {/* Header */}
-      <div style={{ background: Y.primary, padding:"0 32px", display:"flex", alignItems:"center", justifyContent:"space-between", height:60 }}>
-        <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-          <div style={{ background:"white", borderRadius:8, width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center", fontSize:16 }}>✈️</div>
-          <div>
-            <div style={{ fontSize:16, fontWeight:700, color:"white", lineHeight:1.2 }}>TravelHub</div>
-            <div style={{ fontSize:11, color: Y.lavender, lineHeight:1 }}>Payment Intelligence</div>
-          </div>
+      <div style={{ background: Y.primary, padding:"0 32px", display:"flex", alignItems:"center", justifyContent:"space-between", height:64 }}>
+        <div style={{ display:"flex", alignItems:"center", gap:16 }}>
+          <img src="https://cdn.prod.website-files.com/65e210a414fae2cb8054a995/695d6f6d2ced24e0f5c0cb0b_yuno_wordmark_blue.svg"
+            alt="Yuno" style={{ height:22, filter:"brightness(0) invert(1)" }} />
+          <div style={{ width:1, height:28, background:"rgba(255,255,255,0.25)" }} />
+          <div style={{ fontSize:13, color:"rgba(255,255,255,0.85)", fontWeight:500 }}>Payment Intelligence Dashboard</div>
         </div>
         <div style={{ fontSize:12, color: Y.lavender }}>
           {fmt(filtered.length)} transactions · Last {filterDays} days
@@ -358,18 +402,26 @@ export default function App() {
           <div style={{ background: Y.cardBg, borderRadius:12, padding:24, border:`1px solid ${Y.border}` }}>
             <div style={{ fontSize:15, fontWeight:600, marginBottom:4, color: Y.dark }}>Auth Rate by Method</div>
             <div style={{ fontSize:12, color: Y.gray, marginBottom:20 }}>Higher is better</div>
-            {methodBreakdown.map(m => (
-              <div key={m.method} style={{ marginBottom:14 }}>
-                <div style={{ display:"flex", justifyContent:"space-between", fontSize:13, color: Y.dark, marginBottom:4 }}>
-                  <span>{m.method}</span>
-                  <span style={{ fontWeight:600, color: m.authRate>85 ? Y.success : m.authRate>75 ? Y.warn : Y.error }}>{m.authRate}%</span>
+            {methodBreakdown.map(m => {
+              const key = Object.keys(METHOD_LABELS).find(k => METHOD_LABELS[k] === m.method);
+              return (
+                <div key={m.method} style={{ marginBottom:14 }}>
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:4 }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                      <div style={{ display:"flex", alignItems:"center", justifyContent:"center", width:32 }}>
+                        {METHOD_LOGOS[key]}
+                      </div>
+                      <span style={{ fontSize:13, color: Y.dark }}>{m.method}</span>
+                    </div>
+                    <span style={{ fontWeight:600, fontSize:13, color: m.authRate>85 ? Y.success : m.authRate>75 ? Y.warn : Y.error }}>{m.authRate}%</span>
+                  </div>
+                  <div style={{ height:8, background: Y.primaryBg, borderRadius:4 }}>
+                    <div style={{ height:8, width:`${m.authRate}%`, background: m.authRate>85 ? Y.success : m.authRate>75 ? Y.primary : Y.error, borderRadius:4, transition:"width 0.3s" }} />
+                  </div>
+                  <div style={{ fontSize:11, color: Y.gray, marginTop:2, paddingLeft:40 }}>{fmt(m.volume)} transactions</div>
                 </div>
-                <div style={{ height:8, background: Y.primaryBg, borderRadius:4 }}>
-                  <div style={{ height:8, width:`${m.authRate}%`, background: m.authRate>85 ? Y.success : m.authRate>75 ? Y.primary : Y.error, borderRadius:4, transition:"width 0.3s" }} />
-                </div>
-                <div style={{ fontSize:11, color: Y.gray, marginTop:2 }}>{fmt(m.volume)} transactions</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
