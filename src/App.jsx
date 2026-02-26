@@ -231,7 +231,7 @@ export default function App() {
           <img src="https://cdn.prod.website-files.com/65e210a414fae2cb8054a995/695d6f6d2ced24e0f5c0cb0b_yuno_wordmark_blue.svg"
             alt="Yuno" style={{ height:22, filter:"brightness(0) invert(1)" }} />
           <div style={{ width:1, height:28, background:"rgba(255,255,255,0.25)" }} />
-          <div style={{ fontSize:13, color:"rgba(255,255,255,0.85)", fontWeight:500 }}>Payment Intelligence Dashboard</div>
+          <div style={{ fontSize:13, color:"rgba(255,255,255,0.85)", fontWeight:500 }}>Payment Intelligence Hub for TravelHub</div>
         </div>
         <div style={{ fontSize:12, color: Y.lavender }}>
           {fmt(filtered.length)} transactions · Last {filterDays} days
