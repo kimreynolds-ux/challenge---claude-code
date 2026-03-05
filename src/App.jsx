@@ -233,8 +233,13 @@ export default function App() {
           <div style={{ width:1, height:28, background:"rgba(255,255,255,0.25)" }} />
           <div style={{ fontSize:13, color:"rgba(255,255,255,0.85)", fontWeight:500 }}>Payment Intelligence Hub for TravelHub</div>
         </div>
-        <div style={{ fontSize:12, color: Y.lavender }}>
-          {fmt(filtered.length)} transactions · Last {filterDays} days
+        <div style={{ display:"flex", alignItems:"center", gap:20 }}>
+          <div style={{ fontSize:12, color: Y.lavender }}>
+            {fmt(filtered.length)} transactions · Last {filterDays} days
+          </div>
+          <a href="/proposal" style={{ background:"white", color: Y.primary, fontSize:12, fontWeight:600, padding:"6px 14px", borderRadius:8, textDecoration:"none" }}>
+            View Proposal →
+          </a>
         </div>
       </div>
 
