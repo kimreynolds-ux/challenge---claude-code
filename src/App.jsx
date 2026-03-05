@@ -16,7 +16,7 @@ function generateData() {
 
   const txns = [];
   const now = Date.now();
-  for (let i = 0; i < 1500; i++) {
+  for (let i = 0; i < 150000; i++) {
     const country = countries[Math.floor(Math.random() * countries.length)];
     const method = methods[Math.floor(Math.random() * methods.length)];
     const daysAgo = Math.random() * 30;
