@@ -83,7 +83,7 @@ export default function Proposal() {
           <div style={{ position:"absolute", bottom:-80, right:80, width:200, height:200, borderRadius:"50%", background:"rgba(255,255,255,0.05)" }} />
           <div style={{ position:"relative" }}>
             <div style={{ fontSize:12, color: Y.lavender, fontWeight:600, textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:12 }}>Prepared for</div>
-            <div style={{ fontSize:36, fontWeight:800, color:"white", lineHeight:1.2, marginBottom:8 }}>TravelHub</div>
+            <div style={{ fontSize:36, fontWeight:800, color:"white", lineHeight:1.2, marginBottom:8 }}>Revagroup</div>
             <div style={{ fontSize:18, color: Y.lavender, marginBottom:32 }}>Payment Optimization Proposal</div>
             <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:24 }}>
               {[
@@ -161,12 +161,12 @@ export default function Proposal() {
           </div>
           <div style={{ background: Y.errorBg, border:`1px solid ${Y.error}33`, borderRadius:10, padding:"14px 18px", display:"flex", alignItems:"center", gap:12 }}>
             <div style={{ background: Y.error, color:"white", borderRadius:"50%", width:24, height:24, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, fontWeight:700, flexShrink:0 }}>!</div>
-            <span style={{ fontSize:13, color:"#7f1d1d" }}>At an average auth rate of <strong>{avgCurrentRate.toFixed(1)}%</strong>, TravelHub is losing approximately <strong>{fmtM(upliftAnnual)}/year</strong> in potential revenue — transactions that could be recovered with intelligent payment orchestration.</span>
+            <span style={{ fontSize:13, color:"#7f1d1d" }}>At an average auth rate of <strong>{avgCurrentRate.toFixed(1)}%</strong>, Revagroup is losing approximately <strong>{fmtM(upliftAnnual)}/year</strong> in potential revenue — transactions that could be recovered with intelligent payment orchestration.</span>
           </div>
         </Section>
 
         {/* Markets */}
-        <Section title="Global Coverage" subtitle={`Yuno supports all ${TOTAL_MARKETS} of TravelHub's markets out of the box`}>
+        <Section title="Global Coverage" subtitle={`Yuno supports all ${TOTAL_MARKETS} of Revagroup's markets out of the box`}>
           <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)", gap:12 }}>
             {MARKETS.map(r => (
               <div key={r.region}
@@ -297,7 +297,7 @@ export default function Proposal() {
         {/* Next Steps */}
         <div style={{ background: Y.primary, borderRadius:16, padding:"40px 48px", textAlign:"center" }}>
           <div style={{ fontSize:24, fontWeight:800, color:"white", marginBottom:8 }}>Ready to recover {fmtM(upliftAnnual)}/year?</div>
-          <div style={{ fontSize:14, color: Y.lavender, marginBottom:32 }}>Let's get TravelHub live on Yuno. Implementation typically takes 2–4 weeks.</div>
+          <div style={{ fontSize:14, color: Y.lavender, marginBottom:32 }}>Let's get Revagroup live on Yuno. Implementation typically takes 2–4 weeks.</div>
           <div style={{ display:"flex", justifyContent:"center", gap:16, flexWrap:"wrap" }}>
             {["Book a Technical Call", "Request a Sandbox", "Review Full API Docs"].map((s, i) => (
               <div key={s} style={{ background: i === 0 ? "white" : "rgba(255,255,255,0.15)", color: i === 0 ? Y.primary : "white", padding:"12px 24px", borderRadius:8, fontSize:13, fontWeight:600, cursor:"pointer", border: i === 0 ? "none" : "1px solid rgba(255,255,255,0.3)" }}>
